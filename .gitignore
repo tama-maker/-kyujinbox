@@ -1,0 +1,14 @@
+# 環境変数（APIキー・認証情報を含むため必須）
+.env.local
+.env*.local
+
+# Next.js
+admin/.next/
+admin/node_modules/
+admin/out/
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store

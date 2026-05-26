@@ -20,6 +20,7 @@ export interface ApplicantRow {
   gradingResultJson: string;
   gradingError: string;
   promptChecks: string;
+  jobType: string;
 }
 
 export interface CriteriaItem {

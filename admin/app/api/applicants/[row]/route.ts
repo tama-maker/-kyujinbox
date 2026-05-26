@@ -48,7 +48,7 @@ export async function PATCH(
   }
 
   try {
-    const body = await req.json() as { finalJudge?: string; notes?: string; promptChecks?: string };
+    const body = await req.json() as { finalJudge?: string; notes?: string; promptChecks?: string; jobType?: string };
     await updateApplicantFields(rowNum, body);
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -23,6 +23,7 @@ const COL = {
   ERROR:        '採点エラー',
   RESULT_JSON:  '採点結果JSON',
   PROMPT_CHECKS: 'プロンプト評価',
+  JOB_TYPE:      '職種',
 };
 
 function normalize(h: unknown): string {
@@ -131,6 +132,7 @@ export async function getApplicants(): Promise<ApplicantRow[]> {
         gradingResultJson: get(COL.RESULT_JSON),
         gradingError:      get(COL.ERROR),
         promptChecks:      get(COL.PROMPT_CHECKS),
+        jobType:           get(COL.JOB_TYPE),
       } satisfies ApplicantRow;
     })
     .filter((a) => a.name.trim() !== '');
@@ -203,7 +205,7 @@ export async function writeGradingResult(
 
 export async function updateApplicantFields(
   rowNumber: number,
-  fields: { finalJudge?: string; notes?: string; promptChecks?: string },
+  fields: { finalJudge?: string; notes?: string; promptChecks?: string; jobType?: string },
 ): Promise<void> {
   const sheets = await getSheetsClient();
 
@@ -239,6 +241,9 @@ export async function updateApplicantFields(
   }
   if (fields.promptChecks !== undefined) {
     writes.push({ i: await ensureCol(COL.PROMPT_CHECKS), v: fields.promptChecks });
+  }
+  if (fields.jobType !== undefined) {
+    writes.push({ i: await ensureCol(COL.JOB_TYPE), v: fields.jobType });
   }
 
   await Promise.all(writes.map(({ i, v }) =>

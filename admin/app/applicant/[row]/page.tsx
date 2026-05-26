@@ -76,6 +76,7 @@ export default function ApplicantPage() {
       setFinalJudge(data.finalJudge ?? '');
       setNotes(data.notes ?? '');
       setPromptChecks(parsePromptChecks(data.promptChecks ?? ''));
+      if (data.jobType) setJobType(data.jobType as JobType);
       if (data.gradingResultJson) {
         setResult(JSON.parse(data.gradingResultJson) as GradingResult);
       }
@@ -128,7 +129,7 @@ export default function ApplicantPage() {
       const res = await fetch(`/api/applicants/${row}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ finalJudge, notes, promptChecks: JSON.stringify(promptChecks) }),
+        body: JSON.stringify({ finalJudge, notes, promptChecks: JSON.stringify(promptChecks), jobType }),
       });
       if (!res.ok) throw new Error(await res.text());
       setSaveMsg('保存しました');

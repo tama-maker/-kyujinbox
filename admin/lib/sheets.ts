@@ -205,7 +205,7 @@ export async function writeGradingResult(
 
 export async function updateApplicantFields(
   rowNumber: number,
-  fields: { finalJudge?: string; notes?: string; promptChecks?: string; jobType?: string },
+  fields: { finalJudge?: string; notes?: string; promptChecks?: string; jobType?: string; gradingResultJson?: string },
 ): Promise<void> {
   const sheets = await getSheetsClient();
 
@@ -244,6 +244,9 @@ export async function updateApplicantFields(
   }
   if (fields.jobType !== undefined) {
     writes.push({ i: await ensureCol(COL.JOB_TYPE), v: fields.jobType });
+  }
+  if (fields.gradingResultJson !== undefined) {
+    writes.push({ i: await ensureCol(COL.RESULT_JSON), v: fields.gradingResultJson });
   }
 
   await Promise.all(writes.map(({ i, v }) =>

@@ -19,13 +19,22 @@ const OVERALL_STYLE: Record<string, string> = {
   '判定不可': 'bg-gray-100 text-gray-600 border-gray-300',
 };
 
-function CriteriaRow({ c }: { c: CriteriaItem }) {
+function CriteriaRow({ c, onJudgementChange }: { c: CriteriaItem; onJudgementChange: (v: CriteriaItem['judgement']) => void }) {
   return (
     <tr className="border-b border-gray-100 last:border-0 align-top">
       <td className="px-3 py-2 text-gray-400 text-xs w-8">{c.no}</td>
       <td className="px-3 py-2 text-sm">{c.title}</td>
-      <td className={`px-3 py-2 text-sm text-center w-16 ${JUDGE_STYLE[c.judgement] ?? ''}`}>
-        {c.judgement}
+      <td className={`px-3 py-2 text-sm text-center w-20 ${JUDGE_STYLE[c.judgement] ?? ''}`}>
+        <select
+          value={c.judgement}
+          onChange={(e) => onJudgementChange(e.target.value as CriteriaItem['judgement'])}
+          className={`w-full text-center text-sm rounded border border-transparent hover:border-gray-300 focus:border-blue-400 focus:outline-none bg-transparent cursor-pointer ${JUDGE_STYLE[c.judgement] ?? ''}`}
+        >
+          <option value="〇">〇</option>
+          <option value="△">△</option>
+          <option value="×">×</option>
+          <option value="判定不可">判定不可</option>
+        </select>
       </td>
       <td className="px-3 py-2 text-xs text-gray-600 leading-relaxed">{c.reason}</td>
       <td className="px-3 py-2 text-xs text-gray-500 leading-relaxed italic">{c.relevant_text}</td>
@@ -122,6 +131,20 @@ export default function ApplicantPage() {
     }
   };
 
+  const handleJudgementChange = (qIdx: number, cIdx: number, value: CriteriaItem['judgement']) => {
+    setResult((prev) => {
+      if (!prev) return prev;
+      const newResults = prev.results.map((qr, qi) => {
+        if (qi !== qIdx) return qr;
+        const newCriteria = qr.criteria.map((c, ci) =>
+          ci === cIdx ? { ...c, judgement: value } : c
+        );
+        return { ...qr, criteria: newCriteria };
+      });
+      return { ...prev, results: newResults };
+    });
+  };
+
   const handleSaveMeta = async () => {
     setSaving(true);
     setSaveMsg('');
@@ -129,7 +152,7 @@ export default function ApplicantPage() {
       const res = await fetch(`/api/applicants/${row}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ finalJudge, notes, promptChecks: JSON.stringify(promptChecks), jobType }),
+        body: JSON.stringify({ finalJudge, notes, promptChecks: JSON.stringify(promptChecks), jobType, ...(result ? { gradingResultJson: JSON.stringify(result) } : {}) }),
       });
       if (!res.ok) throw new Error(await res.text());
       setSaveMsg('保存しました');
@@ -325,7 +348,13 @@ export default function ApplicantPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {qr.criteria?.map((c) => <CriteriaRow key={c.no} c={c} />)}
+                      {qr.criteria?.map((c, ci) => (
+                        <CriteriaRow
+                          key={c.no}
+                          c={c}
+                          onJudgementChange={(v) => handleJudgementChange(i, ci, v)}
+                        />
+                      ))}
                     </tbody>
                   </table>
                 </div>
